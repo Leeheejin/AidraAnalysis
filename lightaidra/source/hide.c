@@ -37,13 +37,13 @@ char encoded[512], decoded[512];
 
 // 입력은 암호화 하고싶은 char* str
 // 입력 값을 암호화해준다.
-//암호화 한 값은 전역변수 encoded에 들어감.
+//암호화 한 값은 전역변수 encodeds에 들어감.
 
 void encode(char *str) {
     int x = 0, i = 0, c;
 
     memset(encoded, 0, sizeof(encoded));
-    while (x < strlen(str)) { // 입력한 수만큼 반복
+    while (x < strlen(str)) {
         for (c = 0; c <= sizeof(decodes); c++) {
             if (str[x] == decodes[c]) {
                 encoded[i] = encodes[c];
@@ -56,7 +56,11 @@ void encode(char *str) {
 
     encoded[i] = '\0';
     return;
-} // str에 들어온 문자열을 암호화합니다.
+}
+
+// 입력은 복호화 하고싶은 char* str
+// 입력 값을 암호화해준다.
+// 암호화 한 값은 전역변수 decodeds에 들어감.
 
 void decode(char *str) {
     int x = 0, i = 0, c;
@@ -79,14 +83,14 @@ void decode(char *str) {
 
     decoded[i] = '\0';
     return;
-} // str에 들어온 문자열을 복호화합니다.
+}
 
 int main(int argc, char *argv[]) {
-    if (argv[1] == 0 || argv[2] == 0) {
+    if (argv[1] == 0 || argv[2] == 0) { // 에러메세지 반환
         printf("./lighthide [-encode|-decode] [string]\n");
         return(1);
     } 
-    else if (!strncmp(argv[1], "-encode", 7)) {
+    else if (!strncmp(argv[1], "-encode", 7)) { // 인코딩인지 디코딩인지 확인하고 실행
         encode(argv[2]);
         decode(encoded);
         printf("encoded[%s]:\n%s\n", decoded, encoded);
