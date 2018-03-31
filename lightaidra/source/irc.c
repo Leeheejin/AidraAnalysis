@@ -27,6 +27,8 @@ int connect_to_irc(sock_t *sp) {
     requests_t *req;
     char *token, srv[32];
 
+	//isrv[counter]을 Tokenize한다.
+    
     memset(srv, 0, sizeof srv);
     token = strtok(isrv[counter], ":");
     while (token != NULL) {
@@ -41,6 +43,14 @@ int connect_to_irc(sock_t *sp) {
         token = strtok(NULL, ":");
     }
 
+	/*.맨 처음의 토큰은 srv에 그 값을 복사하고 ps를 1 증가시킨다.
+	port에는 마지막 토큰의 값이 int형으로 들어감
+	위의 srv의 이름을 갖는 호스트를 sp->sockhs에 넣고
+	sp->sockfd 는 IPv4와 TCP / IP를 사용한다는 소켓값을 입력한다.
+	socketadd 에는 IPv4 주소체계와
+	host 변수의 네트워크 바이트 데이터, 그리고 sockhs의 ip주소가 들어가게된다.
+	sin_zero에는 널값을 가득 채운다.*/
+    
     sp->sockfd = false;
     if (!(sp->sockhs = gethostbyname(srv))) return EXIT_FAILURE;
     sp->sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -53,6 +63,9 @@ int connect_to_irc(sock_t *sp) {
 
     if (connect(sp->sockfd, (struct sockaddr *)&sp->sockadr, sizeof sp->sockadr) == false)
         return EXIT_FAILURE;
+
+	/*생성한 소켓을 통해 서버로 접속을 요청하고
+	디코딩 한다. 이 아래로는 추가 분석 후 작성 바람.*/
 
     getrstr();
     snprintf(channel, sizeof(channel)-1, "%s", irc_chan);
