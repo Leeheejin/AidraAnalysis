@@ -35,11 +35,15 @@ char decodes[] = {
 
 char encoded[512], decoded[512];
 
+// 입력은 암호화 하고싶은 char* str
+// 입력 값을 암호화해준다.
+//암호화 한 값은 전역변수 encoded에 들어감.
+
 void encode(char *str) {
     int x = 0, i = 0, c;
 
     memset(encoded, 0, sizeof(encoded));
-    while (x < strlen(str)) {
+    while (x < strlen(str)) { // 입력한 수만큼 반복
         for (c = 0; c <= sizeof(decodes); c++) {
             if (str[x] == decodes[c]) {
                 encoded[i] = encodes[c];
