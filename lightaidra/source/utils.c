@@ -66,7 +66,8 @@ char *getrstr() {
     snprintf(data_ptr, 15, "%s%s", irc_nick_prefix, nm);	// data_ptr에 irc_nick_prefix와 nm의 문자열을 넣는다
     return data_ptr;
 }
-/* 임의의 10개의 문자열을 생성하여 data_ptr에 irc_nick_prefix와 같이 넣어 data_ptr을 반환한다 */
+/* char nm[16]에 0~36사이의 ASKII를 10개  집어넣는다. 나머지는 0으로 초기화. data_ptr 에 15개의 값을 집어넣는다.
+ data_ptr에 irc_nick_prefix([X]\0) 값과 랜덤값 10개\0을 저장하여 반환한다.*/
 
 /* wordcmp(const char *, requests_t *) */
 /* a menu strncmp function.            */
