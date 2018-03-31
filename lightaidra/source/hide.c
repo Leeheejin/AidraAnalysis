@@ -52,7 +52,7 @@ void encode(char *str) {
 
     encoded[i] = '\0';
     return;
-}
+} // str에 들어온 문자열을 암호화합니다.
 
 void decode(char *str) {
     int x = 0, i = 0, c;
@@ -66,13 +66,16 @@ void decode(char *str) {
                 i++;
             }
         }
+    random_ct = rand();
+    random_num = ((random_ct % 254) + 1);
+    a = random_num;
 
         x++;
     }
 
     decoded[i] = '\0';
     return;
-}
+} // str에 들어온 문자열을 복호화합니다.
 
 int main(int argc, char *argv[]) {
     if (argv[1] == 0 || argv[2] == 0) {
