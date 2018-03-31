@@ -264,12 +264,8 @@ unsigned short argn, unsigned short et) {
     }
 
     return EXIT_SUCCESS;
-<<<<<<< HEAD
-} // 에러
-=======
 }
 /* req속 에러태그를 찾은 후 있으면 에러메세지를 전송하고 fail반환, 아니면 success반환 */
->>>>>>> e2f2e548b38154d2d145818779544970c9d59ab7
 
 /* create_irc_servlist()      */
 /* create a irc servers list. */

@@ -69,11 +69,8 @@ int pub_requests(sock_t *sp, requests_t *req) {
         } // rcv_b가 "433"과 같으면, getrstr을 호출해 data_ptr을 반환한 후, 소켓번호 sockfd를 이용해 data_ptr과 문자열을 전송한다. 실패시엔 EXIT_FAILURE를 반환한다
         else if (! strncmp(req->rcv_b, "001", strlen(req->rcv_b))) {
             if (cmd_init(sp) == false) return EXIT_FAILURE;
-<<<<<<< HEAD
         }  // 채널에 연결되었는지 연결 여부를 확인하고 결과값을 반환
-=======
         } // rcv_b가 "001"과 같으면 채널에 가입한다. 실패시 fail
->>>>>>> e2f2e548b38154d2d145818779544970c9d59ab7
         else if (! strncmp(req->rcv_b, "332", strlen(req->rcv_b))) {
             if (max_pids == 0 &&  stop == 0) {                              // max_pids (irc.h), stop (requests.h)
                 if (!twordcmp(":.advscan->recursive", req)) {
