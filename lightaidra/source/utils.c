@@ -66,7 +66,8 @@ char *getrstr() {
     snprintf(data_ptr, 15, "%s%s", irc_nick_prefix, nm);	// data_ptr에 irc_nick_prefix와 nm의 문자열을 넣는다
     return data_ptr;
 }
-/* 임의의 10개의 문자열을 생성하여 data_ptr에 irc_nick_prefix와 같이 넣어 data_ptr을 반환한다 */
+/* char nm[16]에 0~36사이의 ASKII를 10개  집어넣는다. 나머지는 0으로 초기화. data_ptr 에 15개의 값을 집어넣는다.
+ data_ptr에 irc_nick_prefix([X]\0) 값과 랜덤값 10개\0을 저장하여 반환한다.*/
 
 /* wordcmp(const char *, requests_t *) */
 /* a menu strncmp function.            */
@@ -91,6 +92,7 @@ int wordcmpp(const char *s, requests_t *req) {
 
 /* twordcmp(const char *, requests_t *) */
 /* a topic strncmp function.            */
+/* 문자열 s와 문자열 변수 rcv_sb 안의 문자열을 비교해 s가 크면 success, 아니면 fail을 반환 */
 int twordcmp(const char *s, requests_t *req) {
     if (strncmp(s, req->rcv_sb, strlen(s)) == true) return EXIT_SUCCESS;
     return EXIT_FAILURE;
@@ -122,16 +124,17 @@ int login_control(requests_t *req) {
 
 /* getextip(sock_t *, requests_t *) */
 /* get extern ip address.                */
+/* 외부 ip주소를 얻습니다. sp와 req에 외부 주소를 얻어 저장합니다. */
 int getextip(sock_t *sp, requests_t *req) {
     int a, b, x = 0;
     char temp[512], *tok;
     sock_t *gfd;
 
-    gfd = (sock_t *) malloc(sizeof(sock_t));
-    gfd->sockhs = gethostbyname(ipreq);
-    gfd->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    gfd = (sock_t *) malloc(sizeof(sock_t));			// 동적 할당
+    gfd->sockhs = gethostbyname(ipreq);					// 주소 입력
+    gfd->sockfd = socket(AF_INET, SOCK_STREAM, 0);		// IPv4 주소체계, TCP/IP 이용
     gfd->sockadr.sin_family = AF_INET;
-    gfd->sockadr.sin_port = htons(http_port);
+    gfd->sockadr.sin_port = htons(http_port);			// http_port = 80 (scan.h)
 
     gfd->sockadr.sin_addr = *((struct in_addr *)gfd->sockhs->h_addr);
 
@@ -145,7 +148,7 @@ int getextip(sock_t *sp, requests_t *req) {
 
     send(gfd->sockfd, IPREQUEST, strlen(IPREQUEST), 0);
     memset(temp, 0, sizeof temp);
-    recv(gfd->sockfd, temp, sizeof(temp)-1, 0);
+    recv(gfd->sockfd, temp, sizeof(temp)-1, 0);			// temp에 소켓으로부터 데이터를 수신 받습니다
 
     x = 0;
     tok = strtok(temp, "\n\n");
@@ -225,6 +228,7 @@ unsigned int host2ip(char *hostname) {
 
 /* parse_input_errors(sock_t *, requests_t *) */
 /* check for input errors.                    */
+/* 입력 에러를 체크합니다 */
 int parse_input_errors(sock_t *sp, requests_t *req, 
 unsigned short argn, unsigned short et) {
     int x = 0, y = 0;
@@ -237,8 +241,8 @@ unsigned short argn, unsigned short et) {
         { '.', ',', '?', '!', 0 }
     };
 
-    while (error_tags[et][x] != 0) {
-        if (strchr(req->rcv_sb, error_tags[et][x])) y++;
+	while (error_tags[et][x] != 0) {
+        if (strchr(req->rcv_sb, error_tags[et][x])) y++;		// strchr(str, c) str에서 문자 c를 찾아 해당 문자위치의 포인터 반환
         if (argn == 2 || argn == 3 || argn == 4) {
             if (strchr(req->rcv_sc, error_tags[et][x])) y++;
         }
@@ -254,13 +258,18 @@ unsigned short argn, unsigned short et) {
         if (y > 0) {
             sockwrite(sp->sockfd, "PRIVMSG %s :[error] one error in your input data, see help!\n", channel);
             return EXIT_FAILURE;
-        }
+        }	// y가 0보다 크면 에러메세지를 전송하고 fail을 반환합니다.
 
         x++;
     }
 
     return EXIT_SUCCESS;
+<<<<<<< HEAD
 } // 에러
+=======
+}
+/* req속 에러태그를 찾은 후 있으면 에러메세지를 전송하고 fail반환, 아니면 success반환 */
+>>>>>>> e2f2e548b38154d2d145818779544970c9d59ab7
 
 /* create_irc_servlist()      */
 /* create a irc servers list. */
