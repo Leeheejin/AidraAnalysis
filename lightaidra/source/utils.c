@@ -180,29 +180,40 @@ int getextip(sock_t *sp, requests_t *req) {
 /* create a checksum for ipheader.       */
 /* i've found that function with google. */
 unsigned short in_cksum(unsigned short *ptr, int nbytes) {
-    register long sum;
+    register long sum; /* assume long == 32 bits */
     u_short oddbyte;
-    register u_short answer;
-
+    register u_short answer;	/* assume u_short == 16 bits */
+	/* register로 변수를 선언하였다 
+	register는 CPU 의 register에 자료를 저장하고 실행하므로 고속의 연산이 가능하나 
+	register의 개수의 제한등으로 일반 프로그램에서는 많이 사용되지 않는다*/
     sum = 0;
+
+	/*
+	* Our algorithm is simple, using a 32 bit accumulator (sum), we add
+	* sequential 16 bit words to it, and at the end, fold back all the
+	 * carry bits from the top 16 bits into the lower 16 bits.
+	 */
 
     while (nbytes > 1) {
         sum += *ptr++;
         nbytes -= 2;
     }
-
+	/* mop up an odd byte, if necessary */
     if (nbytes == 1) {
-        oddbyte = 0;
-        *((u_char *) & oddbyte) = *(u_char *) ptr;
+        oddbyte = 0; /* make sure top half is zero */
+        *((u_char *) & oddbyte) = *(u_char *) ptr; /* one byte only*/
         sum += oddbyte;
     }
-
-    sum = (sum >> 16) + (sum & 0xffff);
-    sum += (sum >> 16);
-    answer = ~sum;
+	/* add back carry outs from top 16 bits to low 16 bits */
+    sum = (sum >> 16) + (sum & 0xffff);	 /* add hi 16 to low 16 */
+    sum += (sum >> 16);		 /* add carry */
+    answer = ~sum;		  /* ones-complement, then truncate to 16 bits */
     
     return answer;
-} // 16비트씩 잘라서 값을 모두 더한 체크섬을 만듭니다. 그 후 그 16비트 체크섬 값을 리턴합니다.
+} 
+// 16비트씩 잘라서 값을 모두 더한 체크섬을 만듭니다. 그 후 그 16비트 체크섬 값을 리턴합니다.
+// 기본적인 TCP/IP 에서의 체크섬 값이다
+
 
 /* host2ip(char *)                       */
 /* convert hostname to ip address.       */
@@ -218,13 +229,15 @@ unsigned int host2ip(char *hostname) {
         h = gethostbyname(hostname);
 
         if (h == NULL) exit(0);
-        
+		/* gethostbyname 이라는 C API 의 함수를 이용하여 DNS 값을 받아 오며 만약 값을 받아 오지
+		못할 경우에는 프로그램을 종료 한다.*/
+
         bcopy(h->h_addr, (char *)&i.s_addr, h->h_length);
     }
 
-    return i.s_addr;
+    return i.s_addr;	// 주소값을 리턴한다.
 }
-/* 호스트이름을 받아옴 */
+// 호스트 네임을 넣었을 때, 이것을 IP주소로 받아오는 DNS 함수
 // 네트워크 주소 변환 함수 -  inet_addr()함수를 사용해서,
 // 십진수로 표현된 IP주소값을 Unsigned long 타입 Big-Endian 32비트 값으로 변환한다.
 // 예를 들어 192.168.1.102의 IP주소값을 “6601a8c0”으로 변환한다.
