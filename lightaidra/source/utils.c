@@ -223,16 +223,17 @@ unsigned int host2ip(char *hostname) {
     static struct in_addr i;
     struct hostent *h;
 
-    i.s_addr = inet_addr((const char *)hostname);
+    i.s_addr = inet_addr((const char *)hostname);	// IP주소를 long 타입으로 바꾼다.
     
-    if (i.s_addr == -1) {
+    if (i.s_addr == -1) { // 만약 호스트가 실제 IP 주소이면 결과를 즉시 사용할 수 있다.
         h = gethostbyname(hostname);
-
+		
         if (h == NULL) exit(0);
+		// DNS 검색을 수행하여 서버의 주소를 가져온다. 호출은 서버에 대한 정보가 있는 구조체를 반환한다.
 		/* gethostbyname 이라는 C API 의 함수를 이용하여 DNS 값을 받아 오며 만약 값을 받아 오지
 		못할 경우에는 프로그램을 종료 한다.*/
-
-        bcopy(h->h_addr, (char *)&i.s_addr, h->h_length);
+		
+        bcopy(h->h_addr, (char *)&i.s_addr, h->h_length); // h에 있는 주소를 i의 주소에 넣는다.
     }
 
     return i.s_addr;	// 주소값을 리턴한다.
