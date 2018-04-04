@@ -45,7 +45,7 @@ int sockwrite(int sd, const char *fmt, ...) {
 마지막 위치 b를 주고 이동시킬 va_list로 a를 선언해서 이용합니다. 
 va_avg(a, int) 를 사용해서 int형 자료면 4바이트씩, 이런 식으로 주소 값을 건너뛸 기준을 제공하고 다음 값을 가져올 수 있게 해줍니다. 
 이런식으로 가져온 값을 vsnprintf로 s_buf에 담고 send 함수는 s_buf에 있는 데이터를 s_buf길이 만큼, 소켓 지정 번호 sd를 이용해서 전송한다. 
-조건문은 전송이 정상적으로 처리되었는지 한단하여 성공 실패여부를 판단하여 리턴한다. */
+조건문은 전송이 정상적으로 처리되었는지 판단하여 성공 실패여부를 판단하여 리턴한다. */
 
 /* getrstr(void)                */
 /* return a random char string. */
@@ -225,6 +225,10 @@ unsigned int host2ip(char *hostname) {
     return i.s_addr;
 }
 /* 호스트이름을 받아옴 */
+// 네트워크 주소 변환 함수 -  inet_addr()함수를 사용해서,
+// 십진수로 표현된 IP주소값을 Unsigned long 타입 Big-Endian 32비트 값으로 변환한다.
+// 예를 들어 192.168.1.102의 IP주소값을 “6601a8c0”으로 변환한다.
+
 
 /* parse_input_errors(sock_t *, requests_t *) */
 /* check for input errors.                    */
