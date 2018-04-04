@@ -155,11 +155,11 @@ int getextip(sock_t *sp, requests_t *req) {
     
     while (tok != NULL) {
         if (x == 10) {
-            sscanf(tok, "%d.%d.%*s.%*s", &a,&b);
-            snprintf(req->rcv_sb, 4, "%d", a);
+            sscanf(tok, "%d.%d.%*s.%*s", &a,&b); // 주소를 입력받습니다. 앞에 총 4자리 중 앞의 2자리를 숫자 입력을 통해 받습니다.
+            snprintf(req->rcv_sb, 4, "%d", a); // 입력받은 값을 rcv_sb와 rcv_sc에 넣습니다.
             snprintf(req->rcv_sc, 4, "%d", b);
 
-            if (a > 255 || b > 255) return EXIT_FAILURE;    
+            if (a > 255 || b > 255) return EXIT_FAILURE;    // 값이 올바르게 들어왔는지 체크하고 결과값을 리턴합니다.
 
             close(gfd->sockfd);
             free(gfd);
@@ -202,7 +202,7 @@ unsigned short in_cksum(unsigned short *ptr, int nbytes) {
     answer = ~sum;
     
     return answer;
-}
+} // 16비트씩 잘라서 값을 모두 더한 체크섬을 만듭니다. 그 후 그 16비트 체크섬 값을 리턴합니다.
 
 /* host2ip(char *)                       */
 /* convert hostname to ip address.       */
