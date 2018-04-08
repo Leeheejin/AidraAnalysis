@@ -139,31 +139,38 @@ void *scan_address(scan_data_t *scan_data) {
 
     scan_isp = (sock_t *) malloc(sizeof(sock_t));
 
-    if (!(scan_isp->sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP))) pthread_exit(NULL);
+    if (!(scan_isp->sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP))) pthread_exit(NULL);	// 소켓생성(실패시 쓰레드 종료) 
 
+	/* 소켓 포트, 주소체계 할당*/
     memset(temp, 0, sizeof temp);
     memset(&scan_isp->sockadr, 0, sizeof scan_isp->sockadr);
     scan_isp->sockadr.sin_port = htons(telnet_port);
     scan_isp->sockadr.sin_family = AF_INET;
 
+	/* 시간값 할당(tv_sec; 1초, tv_usec: 0.5) */
     timeout_value = 1;
     tm.tv_sec = timeout_value;
     tm.tv_usec = 500000;
 
+	/* hostname의 주소를 32비트값으로 변환해 scan_isp에 저장한다. 실패시엔 소켓을 풀고 쓰레드를 종료한다. */
     if (!inet_aton((const char *)scan_data->hostname, (struct in_addr *)&scan_isp->sockadr.sin_addr)) {
         close(scan_isp->sockfd);
         free(scan_isp);
         pthread_exit(NULL);
     }
 
+	/* sockfd에 대한 플래그값을 반환 */
     flags = fcntl(scan_isp->sockfd, F_GETFL, 0);
     
+	/* sockfd를 NONBLOCK모드로 바꿔준다. */
+	/* NONBLOCK모드시 기다리지 않고 바로 반환한다. */
     if (fcntl(scan_isp->sockfd, F_SETFL, O_NONBLOCK) == false) {
         close(scan_isp->sockfd);
         free(scan_isp);
         pthread_exit(NULL);
     }
 
+	/* 접속 요청(실패시 소켓풀고 쓰레드 종료) */
     if (connect(scan_isp->sockfd, (struct sockaddr *)&scan_isp->sockadr, sizeof(scan_isp->sockadr)) == -1) {
         if (errno != EINPROGRESS) {
             close(scan_isp->sockfd);
@@ -172,8 +179,10 @@ void *scan_address(scan_data_t *scan_data) {
         }
     }
 
+	/* wr에 sockfd를 추가*/
     FD_SET(scan_isp->sockfd, &wr);
     
+	/* tm간격으로 wr에 등록된 파일들을 검사해 변경된 파일개수를 retv에 리턴한다 */
     if (!(retv = select(scan_isp->sockfd + 1, NULL, &wr, NULL, &tm))) {
         close(scan_isp->sockfd);
         free(scan_isp);
@@ -185,6 +194,7 @@ void *scan_address(scan_data_t *scan_data) {
         pthread_exit(NULL);
     }
 
+	/* 소켓으로부터 데이터를 수신받아 데이터가 있거나 오류발생시 종료 */
     if (recv(scan_isp->sockfd, temp, sizeof(temp) - 1, 0) != false) {
         close(scan_isp->sockfd);
         free(scan_isp);

@@ -232,7 +232,7 @@ void sigkill() {
     exit(EXIT_SUCCESS);
 }
 
-/* cmd_join(sock_t *) */ 
+/* cmd_init(sock_t *) */ 
 /* join channel after connect. */ 
 /* 연결 후에 채널에 가입한다 */
 int cmd_init(sock_t *sp) {
