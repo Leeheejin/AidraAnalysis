@@ -14,6 +14,7 @@ struct send_tcp {
     char buf[20];
 };
 
+//슈도 코드를 위한 헤더 구조체
 struct pseudo_header {
     unsigned int source_address;
     unsigned int dest_address;
