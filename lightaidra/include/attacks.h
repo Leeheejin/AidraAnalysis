@@ -15,6 +15,7 @@ struct send_tcp {
 };
 
 //슈도 코드를 위한 헤더 구조체
+//체크섬 계산을 위해서 필요하다
 struct pseudo_header {
     unsigned int source_address;
     unsigned int dest_address;
