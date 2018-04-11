@@ -130,6 +130,8 @@ crash:
 
 /* scan_address(scan_data_t *) */ 
 /* start addresses scanner.  */ 
+/* 주소 스캐너?를 실행한다 */
+/* 유효한 주소들을 찾아내 result_file에 입력하는것으로 추정중(좀더 분석 필요) */
 void *scan_address(scan_data_t *scan_data) {
     FILE *rfd;
     int retv, flags;
@@ -152,7 +154,8 @@ void *scan_address(scan_data_t *scan_data) {
     tm.tv_sec = timeout_value;
     tm.tv_usec = 500000;
 
-	/* hostname의 주소를 32비트값으로 변환해 scan_isp에 저장한다. 실패시엔 소켓을 풀고 쓰레드를 종료한다. */
+	/* hostname의 주소를 32비트값으로 변환해 scan_isp에 저장한다. */
+	/* 실패시엔 소켓을 풀고 쓰레드를 종료한다. */
     if (!inet_aton((const char *)scan_data->hostname, (struct in_addr *)&scan_isp->sockadr.sin_addr)) {
         close(scan_isp->sockfd);
         free(scan_isp);
@@ -182,7 +185,8 @@ void *scan_address(scan_data_t *scan_data) {
 	/* wr에 sockfd를 추가*/
     FD_SET(scan_isp->sockfd, &wr);
     
-	/* tm간격으로 wr에 등록된 파일들을 검사해 변경된 파일개수를 retv에 리턴한다 */
+	/* tm간격으로 wr에 등록된 파일들을 검사해 변경된 파일개수를 retv에 리턴 */
+	/* wr에 쓰여진 데이터 유무를 검사한다 */
     if (!(retv = select(scan_isp->sockfd + 1, NULL, &wr, NULL, &tm))) {
         close(scan_isp->sockfd);
         free(scan_isp);
@@ -201,14 +205,18 @@ void *scan_address(scan_data_t *scan_data) {
         pthread_exit(NULL);
     }
 
+	/* EWOULDBLOCK 에러시 소켓해제 및 쓰레드종료 */
     if (errno != EWOULDBLOCK) {
         close(scan_isp->sockfd);
         free(scan_isp);
         pthread_exit(NULL);
     }
 
+	/* rd에 sockfd추가 */
     FD_SET(scan_isp->sockfd, &rd);
     
+	/* tm간격으로 rd에 등록된 파일들을 검사해 변경된 파일개수를 retv에 리턴 */
+	/* rd에 읽을 데이터 유무를 검사한다 */
     if (!(retv = select(scan_isp->sockfd + 1, &rd, NULL, NULL, &tm))) {
         close(scan_isp->sockfd);
         free(scan_isp);
@@ -219,13 +227,17 @@ void *scan_address(scan_data_t *scan_data) {
         free(scan_isp);
         pthread_exit(NULL);
     } 
-    else {
+    else {  /* 데이터가 있을시 */
+
+		/* sockfd의 플래그를 flags의 값으로 재설정한다 */
         if ((fcntl(scan_isp->sockfd, F_SETFL, flags)) == false) {
             close(scan_isp->sockfd);
             free(scan_isp);
             pthread_exit(NULL);
         }
 
+		/* 소켓으로부터 데이터를 수신받아 있을경우, */
+		/* result_file을 열어 hostname을 입력받은 뒤, 파일을 닫고 total값을 증가시킨다*/
         if (recv(scan_isp->sockfd, temp, sizeof(temp) - 1, 0) != false) {
             rfd = fopen(result_file, "a+");
             
@@ -237,7 +249,7 @@ void *scan_address(scan_data_t *scan_data) {
             }
         }
     }
-
+	/* 소켓해제 및 쓰레드 종료 */
     close(scan_isp->sockfd);
     free(scan_isp);
 
