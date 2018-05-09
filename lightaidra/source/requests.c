@@ -252,7 +252,7 @@ int cmd_ping(sock_t *sp) {
 }
 
 /* cmd_login(sock_t *, requests_t *) */ 
-/* log in the party-line bot.  */ 
+/* login the party-line bot.  */ 
 void cmd_login(sock_t *sp, requests_t * req) {
     if (login_status) {
         if (login(sp, req) == true) login_status = true;
